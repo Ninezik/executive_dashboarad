@@ -27,6 +27,7 @@ FROM
             ELSE 0
         END
     ) AS DECIMAL(18,2)) AS pajak,
+    SUM(tot_weight_kg)berat,
     'LOGISTIK' AS kelompok,
     'GLID' AS sumber
 FROM (
@@ -36,6 +37,8 @@ select
     service_code,
     order_code,
     jenis_produk,
+    SUM(case when g.konversi_berat =g.total_qty or g.konversi_berat >=1000 then tot_weight_kg/konversi_berat
+    else tot_weight_kg end)tot_weight_kg,
    MAX(total_amount)total_amount
 FROM glid.glid g
 group by 1,2,3,4,5
@@ -76,3 +79,4 @@ on
 			t1.kdkantor = t2.nopend_dirian
 )t4
 on t3.kode_nopen=t4.kdnopen
+order by 1,2
