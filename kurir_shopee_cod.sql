@@ -10,6 +10,7 @@ COUNT(connote__connote_code)produksi,
 SUM(coalesce(connote__connote_service_price,0) +coalesce(connote__connote_surcharge_amount,0))pendapatan,
 SUM(coalesce(t2.good_value,0)*0.05) AS fee_cod,
 SUM(connote__chargeable_weight)berat,
+SUM((coalesce(t1.connote__connote_service_price,0) *0.011)+(coalesce(t1.connote__connote_surcharge_amount,0)*0.11))pajak,
 'RB' subdit_id
 FROM
 (select
