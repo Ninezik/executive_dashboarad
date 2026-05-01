@@ -29,7 +29,17 @@ FROM
     ) AS DECIMAL(18,2)) AS pajak,
     'LOGISTIK' AS kelompok,
     'GLID' AS sumber
+FROM (
+select
+	tgl_billing,
+    kode_nopen,
+    service_code,
+    order_code,
+    jenis_produk,
+   MAX(total_amount)total_amount
 FROM glid.glid g
+group by 1,2,3,4,5
+)t0
 WHERE DATE(tgl_billing) > DATE '2026-01-01'
 GROUP by 1,2,3,4)t3
 left join
