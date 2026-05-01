@@ -1,0 +1,174 @@
+SELECT t5.*,
+case when t6.ketnopen is NULL 
+then 'TIDAK TERDEFINISI'
+else t6.ketnopen
+end as ketnopen,
+case when t6.ketnopen is NULL 
+then 'TIDAK TERDEFINISI'
+else t6.regional::VARCHAR
+end as regional,
+case when t6.kcu is NULL 
+then 'TIDAK TERDEFINISI'
+else t6.kcu
+end as kcu,
+case when t6.kc is NULL 
+then 'TIDAK TERDEFINISI'
+else t6.kc
+end as kc
+FROM
+(select
+		t1.*,
+		case
+			when t1.customer_code = 'KOSONG' then 'RB'
+		when length(t2.subdit_id)<2
+		or t2.subdit_id is null then 'EB'
+		else t2.subdit_id
+	end as subdit_id
+from
+		(
+	select
+			DATE(connote__created_at) as connote__created_at,
+			coalesce(UPPER(customer_code),
+		'KOSONG') as customer_code,
+			UPPER(transform__channel)transform__channel,
+			np.location_data_created__custom_field__nopen,
+			UPPER(connote__connote_service) as connote__connote_service,
+			case
+			when connote__connote_service in ('KRT', 'KBM', 'FFE', 'FF-LKPP') then 'LOGISTIK'
+			else 'KURIR'
+		end as kelompok,
+		COUNT(connote__connote_code)produksi,
+		SUM(coalesce(connote__connote_service_price, 0) + coalesce(connote__connote_surcharge_amount, 0))pendapatan,
+		SUM(coalesce(custom_field__fee_value, 0)) fee_cod,
+		SUM(coalesce(np.connote__chargeable_weight , 0))berat
+	from
+		nipos__part_2026 np
+	where
+		UPPER(connote__location_name) != 'AGP TESTING LOCATION'
+		and UPPER(connote__connote_state) not in ('CANCEL', 'PENDING')
+		and not(
+    coalesce(UPPER(customer_code) ,
+		'')= 'DAGSHOPEE04120A'
+			and coalesce(UPPER(custom_field__cod),
+			'')!= 'NONCOD'
+)
+		and connote__connote_amount >= 0
+		and np.connote__connote_service != 'LNINCOMING'
+	group by
+		1,
+		2,
+		3,
+		4,
+		5,
+		6)t1
+	--joinkeun ka referensi subdit
+left join
+(
+	select
+		distinct idregpelanggan,
+		subdit_id
+	from
+		nipos.m_pelanggan)t2
+on
+	t1.customer_code = t2.idregpelanggan
+union
+--union ka shopee cod
+select
+	DATE(t1.connote__created_at) as connote__created_at,
+	t1.customer_code ,
+	t1.transform__channel,
+	t1.location_data_created__custom_field__nopen,
+	t1.connote__connote_service,
+	case
+		when t1.connote__connote_service in ('KRT', 'KBM', 'FFE', 'FF-LKPP') then 'LOGISTIK'
+		else 'KURIR'
+	end as kelompok,
+	COUNT(connote__connote_code)produksi,
+	SUM(coalesce(connote__connote_service_price, 0) + coalesce(connote__connote_surcharge_amount, 0))pendapatan,
+	SUM(coalesce(t2.good_value, 0)* 0.05) as fee_cod,
+	SUM(connote__chargeable_weight)berat,
+	'RB' subdit_id
+from
+	(
+	select
+		distinct connote__created_at,
+		customer_code,
+		UPPER(transform__channel)transform__channel,
+		location_data_created__custom_field__nopen,
+		UPPER(connote__connote_service) as connote__connote_service,
+		case
+			when connote__connote_service in ('KRT', 'KBM', 'FFE', 'FF-LKPP') then 'LOGISTIK'
+			else 'KURIR'
+		end as kelompok,
+		connote__connote_code,
+		connote__connote_service_price,
+		connote__connote_surcharge_amount,
+		np.connote__connote_booking_code ,
+		connote__chargeable_weight
+	from
+		nipos.nipos__part_2026 np
+	where
+		UPPER(connote__location_name) != 'AGP TESTING LOCATION'
+			and connote__connote_amount >= 0
+			and np.connote__connote_service != 'LNINCOMING'
+			and UPPER(connote__connote_state) not in ('CANCEL', 'PENDING')
+				and (
+    coalesce(UPPER(customer_code) ,
+				'')= 'DAGSHOPEE04120A'
+					and coalesce(UPPER(custom_field__cod),
+					'')!= 'NONCOD')
+)
+t1
+left join 
+	(
+	select
+		distinct resi,
+		good_value
+	from
+		webhook_marketplace wm
+	where
+		wm.wktsrv >'20260101')t2
+on
+	t1.connote__connote_booking_code = t2.resi
+group by
+	1,
+	2,
+	3,
+	4,
+	5,
+	6
+)t5
+--joinkeun ka referensi
+left JOIN
+(select
+			distinct 
+			t1.kdnopen,
+			t1.ketnopen,
+			t2.regional,
+			t2.kcu,
+			t2.kc
+	from
+			(
+		select
+				kdnopen,
+				UPPER(ketnopen)ketnopen,
+				kdkantor
+		from
+				referensi.refrensikantorbaru
+)t1
+		--referensi_lengkap
+	join
+(
+		select
+			distinct 
+			nopend_dirian,
+				kc,
+				kcu,
+				regional
+		from
+				referensi.ref_kcu_kc_2023
+)t2
+on
+			t1.kdkantor = t2.nopend_dirian
+)t6
+on t6.kdnopen=t5.location_data_created__custom_field__nopen
