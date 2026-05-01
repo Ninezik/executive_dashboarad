@@ -1,5 +1,12 @@
-SELECT
+select  t3.*,
+coalesce(UPPER(t4.ketnopen),'TIDAK TERDEFINISI') ketnopen,
+coalesce(t4.regional::varchar,'TIDAK TERDEFINISI') regional,
+coalesce(t4.kcu,'TIDAK TERDEFINISI')  kcu,
+coalesce(t4.kc,'TIDAK TERDEFINISI')  kc
+FROM
+(SELECT
     DATE(tgl_billing) AS connote__created_at,
+    kode_nopen,
     service_code AS connote__connote_service,
     CASE
         WHEN service_code = 'FFE' THEN 'EB'
@@ -24,4 +31,38 @@ SELECT
     'GLID' AS sumber
 FROM glid.glid g
 WHERE DATE(tgl_billing) > DATE '2026-01-01'
-GROUP by 1,2,3
+GROUP by 1,2,3,4)t3
+left join
+(
+	select
+			distinct 
+			t1.kdnopen,
+			t1.ketnopen,
+			t2.regional,
+			t2.kcu,
+			t2.kc
+	from
+			(
+		select
+				kdnopen,
+				ketnopen,
+				kdkantor
+		from
+				referensi.refrensikantorbaru
+)t1
+		--referensi_lengkap
+	join
+(
+		select
+			distinct 
+			nopend_dirian,
+				kc,
+				kcu,
+				regional
+		from
+				referensi.ref_kcu_kc_2023
+)t2
+on
+			t1.kdkantor = t2.nopend_dirian
+)t4
+on t3.kode_nopen=t4.kdnopen
