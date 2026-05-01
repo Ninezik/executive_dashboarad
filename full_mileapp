@@ -40,7 +40,8 @@ from
 		COUNT(connote__connote_code)produksi,
 		SUM(coalesce(connote__connote_service_price, 0) + coalesce(connote__connote_surcharge_amount, 0))pendapatan,
 		SUM(coalesce(custom_field__fee_value, 0)) fee_cod,
-		SUM(coalesce(np.connote__chargeable_weight , 0))berat
+		SUM(coalesce(np.connote__chargeable_weight , 0))berat,
+		SUM((coalesce(connote__connote_service_price, 0) * 0.011)+(coalesce(connote__connote_surcharge_amount, 0)* 0.11))pajak
 	from
 		nipos__part_2026 np
 	where
@@ -87,6 +88,7 @@ select
 	SUM(coalesce(connote__connote_service_price, 0) + coalesce(connote__connote_surcharge_amount, 0))pendapatan,
 	SUM(coalesce(t2.good_value, 0)* 0.05) as fee_cod,
 	SUM(connote__chargeable_weight)berat,
+	SUM((coalesce(connote__connote_service_price, 0) * 0.011)+(coalesce(connote__connote_surcharge_amount, 0)* 0.11))pajak,
 	'RB' subdit_id
 from
 	(
