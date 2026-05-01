@@ -33,8 +33,7 @@ from
             then total_amount - (total_amount / (1 + 0.011))
             else 0
         end
-    ) as DECIMAL(18,
-		2)) as pajak,
+    ) as DECIMAL(18,2)) as pajak,
 		SUM(tot_weight_kg)berat,
 		'LOGISTIK' as kelompok,
 		'GLID' as sumber
@@ -46,7 +45,7 @@ from
 			service_code,
 			order_code,
 			jenis_produk,
-			SUM(case when g.konversi_berat = g.total_qty or g.konversi_berat >= 1000 then tot_weight_kg / konversi_berat
+			SUM(case when g.konversi_berat = g.total_qty or (g.konversi_berat >= 1000 and total_qty>1) then tot_weight_kg / konversi_berat
     else tot_weight_kg end)tot_weight_kg,
 			MAX(total_amount)total_amount
 		from
