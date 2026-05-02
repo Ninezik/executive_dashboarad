@@ -3,11 +3,6 @@ select
 	case
 		when t6.ketnopen is null 
 then 'TIDAK TERDEFINISI'
-		else t6.ketnopen
-	end as ketnopen,
-	case
-		when t6.ketnopen is null 
-then 'TIDAK TERDEFINISI'
 		else t6.regional::VARCHAR
 	end as regional,
 	case
@@ -19,7 +14,18 @@ then 'TIDAK TERDEFINISI'
 		when t6.kc is null 
 then 'TIDAK TERDEFINISI'
 		else t6.kc
-	end as kc
+	end as kc,
+	case
+		when t6.ketnopen is null 
+then 'TIDAK TERDEFINISI'
+		else t6.ketnopen
+	end as KCP,
+	case
+		when t6.jenis is null 
+then 'TIDAK TERDEFINISI'
+		else t6.jenis
+	end as jenis
+	
 from
 	(
 	select
@@ -267,13 +273,15 @@ t1.kdnopen,
 		t1.ketnopen,
 		t2.regional,
 		t2.kcu,
-		t2.kc
+		t2.kc,
+		t1.jenis
 	from
 		(
 		select
 			kdnopen,
 			UPPER(ketnopen)ketnopen,
-			kdkantor
+			kdkantor,
+			UPPER(jenis)jenis 
 		from
 			referensi.refrensikantorbaru
 )t1
