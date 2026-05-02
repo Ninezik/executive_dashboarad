@@ -1,6 +1,4 @@
-select distinct kelompok,sumber
-FROM
-(SELECT t5.*,
+SELECT t5.*,
 case when t6.ketnopen is NULL 
 then 'TIDAK TERDEFINISI'
 else t6.ketnopen
@@ -272,4 +270,4 @@ left JOIN
 on
 			t1.kdkantor = t2.nopend_dirian
 )t6
-on t6.kdnopen=t5.location_data_created__custom_field__nopen)t7
+on t6.kdnopen=t5.location_data_created__custom_field__nopen
