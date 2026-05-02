@@ -16,7 +16,7 @@ select
 	SUM(connote__chargeable_weight)berat,
 	SUM((coalesce(t1.connote__connote_service_price, 0) * 0.011)+(coalesce(t1.connote__connote_surcharge_amount, 0)* 0.11))pajak,
 	'RB' subdit_id,
-	'NIPOS' sumber
+	'NIPOS SHOPEE COD' sumber
 from
 	(
 	select
@@ -24,7 +24,7 @@ from
 		pod__timereceive ,
 		--		cek data swp
 case
-			when np.custom_field__final_swp is null then 'TANGGAL SWP TIDAK TERDEFINISI'
+			when np.custom_field__final_swp is null then 'NILAI SWP TIDAK TERDEFINISI'
 			--		cek status swp
 			--		ketika pod ada
 			when np.pod__timereceive is not null
