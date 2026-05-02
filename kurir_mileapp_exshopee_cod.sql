@@ -14,7 +14,7 @@ from
 		DATE(np.pod__timereceive)pod__timereceive ,
 		--		cek data swp
 case
-			when np.custom_field__final_swp is null then 'TANGGAL SWP TIDAK TERDEFINISI'
+			when np.custom_field__final_swp is null then 'NILAI SWP TIDAK TERDEFINISI'
 			--		cek status swp
 			--		ketika pod ada
 			when np.pod__timereceive is not null
