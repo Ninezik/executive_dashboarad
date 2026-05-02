@@ -1,4 +1,6 @@
-SELECT t5.*,
+select distinct kelompok,sumber
+FROM
+(SELECT t5.*,
 case when t6.ketnopen is NULL 
 then 'TIDAK TERDEFINISI'
 else t6.ketnopen
@@ -24,7 +26,7 @@ FROM
 		or t2.subdit_id is null then 'EB'
 		else t2.subdit_id
 	end as subdit_id,
-	'NIPOS SHOPEE COD' sumber
+	'NIPOS' sumber
 from
 	(
 	select
@@ -112,7 +114,7 @@ select
 	SUM(connote__chargeable_weight)berat,
 	SUM((coalesce(t1.connote__connote_service_price, 0) * 0.011)+(coalesce(t1.connote__connote_surcharge_amount, 0)* 0.11))pajak,
 	'RB' subdit_id,
-	'NIPOS' sumber
+	'NIPOS SHOPEE COD' sumber
 from
 	(
 	select
@@ -270,4 +272,4 @@ left JOIN
 on
 			t1.kdkantor = t2.nopend_dirian
 )t6
-on t6.kdnopen=t5.location_data_created__custom_field__nopen
+on t6.kdnopen=t5.location_data_created__custom_field__nopen)t7
