@@ -24,7 +24,7 @@ FROM
 		or t2.subdit_id is null then 'EB'
 		else t2.subdit_id
 	end as subdit_id,
-	'NIPOS SHOPEE COD' sumber
+	'NIPOS' sumber
 from
 	(
 	select
@@ -112,7 +112,7 @@ select
 	SUM(connote__chargeable_weight)berat,
 	SUM((coalesce(t1.connote__connote_service_price, 0) * 0.011)+(coalesce(t1.connote__connote_surcharge_amount, 0)* 0.11))pajak,
 	'RB' subdit_id,
-	'NIPOS' sumber
+	'NIPOS SHOPEE COD' sumber
 from
 	(
 	select
