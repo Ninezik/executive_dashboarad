@@ -96,6 +96,3 @@ WHERE rn = 1
 )t4
 on
 	t3.location_data_created__custom_field__nopen  = t4.kdnopen
-order by
-	1,
-	2
