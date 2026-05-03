@@ -12,8 +12,8 @@ select
 	'TIDAK TERDEFINISI') jenis
 from
 	(select
-		DATE(tgl_billing) as connote__created_at,
-		null pod__timereceive ,
+		DATE(tgl_billing) connote__created_at,
+		DATE(null) pod__timereceive ,
 		'GLID' status_sla,
 		'GLID' customer_code,
 		'GLID' transform__channel,
