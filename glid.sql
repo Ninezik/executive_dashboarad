@@ -1,13 +1,15 @@
 select
 	t3.*,
-	coalesce(UPPER(t4.ketnopen),
-	'TIDAK TERDEFINISI') ketnopen,
 	coalesce(t4.regional::varchar,
 	'TIDAK TERDEFINISI') regional,
 	coalesce(t4.kcu,
 	'TIDAK TERDEFINISI') kcu,
 	coalesce(t4.kc,
-	'TIDAK TERDEFINISI') kc
+	'TIDAK TERDEFINISI') kc,
+	coalesce(UPPER(t4.ketnopen),
+	'TIDAK TERDEFINISI') kcp,
+	coalesce(UPPER(t4.jenis),
+	'TIDAK TERDEFINISI') jenis
 from
 	(select
 		DATE(tgl_billing) as connote__created_at,
@@ -15,8 +17,9 @@ from
 		'GLID' status_sla,
 		'GLID' customer_code,
 		'GLID' transform__channel,
-		location_data_created__custom_field__nopen,
-		service_code as connote__connote_service,
+		kode_nopen location_data_created__custom_field__nopen,
+		service_code connote__connote_service,
+		service_name nama_produk,
 		'LOGISTIK' as kelompok,
 		COUNT(order_code) as produksi,
 		cast(SUM(
@@ -42,8 +45,9 @@ from
 		(
 		select
 			tgl_billing,
-			kode_nopen location_data_created__custom_field__nopen,
+			kode_nopen ,
 			service_code,
+			service_name ,
 			order_code,
 			jenis_produk,
 			case
@@ -56,41 +60,39 @@ from
 		from
 			glid.glid g
 		where DATE(tgl_billing) >='20260101'
-		group by 1,2,3,4,5,6
+		group by 1,2,3,4,5,6,7
 )t0
-group by 1,2,3,4,5,6,7,8,t0.subdit_id)t3
+group by 1,2,3,4,5,6,7,8,9,t0.subdit_id)t3
 left join
-(
-	select
-			distinct 
-			t1.kdnopen,
-			t1.ketnopen,
-			t2.regional,
-			t2.kcu,
-			t2.kc
-	from
-			(
-		select
-				kdnopen,
-				ketnopen,
-				kdkantor
-		from
-				referensi.refrensikantorbaru
-)t1
-		--referensi_lengkap
-	join
-(
-		select
-			distinct 
-			nopend_dirian,
-				kc,
-				kcu,
-				regional
-		from
-				referensi.ref_kcu_kc_2023
-)t2
-on
-			t1.kdkantor = t2.nopend_dirian
+(SELECT *
+FROM (
+    SELECT
+        t1.kdnopen,
+        t1.ketnopen,
+        t2.regional,
+        t2.kcu,
+        t2.kc,
+        t1.jenis,
+        ROW_NUMBER() OVER (PARTITION BY t1.kdnopen ORDER BY t1.kdnopen) AS rn
+    FROM (
+        SELECT
+            kdnopen,
+            ketnopen,
+            kdkantor,
+            jenis
+        FROM referensi.refrensikantorbaru
+    ) t1
+    JOIN (
+        SELECT DISTINCT
+            nopend_dirian,
+            kc,
+            kcu,
+            regional
+        FROM referensi.ref_kcu_kc_2023
+    ) t2
+    ON t1.kdkantor = t2.nopend_dirian
+) x
+WHERE rn = 1
 )t4
 on
 	t3.location_data_created__custom_field__nopen  = t4.kdnopen
