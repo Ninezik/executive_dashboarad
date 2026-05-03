@@ -1,4 +1,17 @@
 select
+	t3.*,
+	coalesce(t4.regional::varchar,
+	'TIDAK TERDEFINISI') regional,
+	coalesce(t4.kcu,
+	'TIDAK TERDEFINISI') kcu,
+	coalesce(t4.kc,
+	'TIDAK TERDEFINISI') kc,
+	coalesce(UPPER(t4.ketnopen),
+	'TIDAK TERDEFINISI') kcp,
+	coalesce(UPPER(t4.jenis),
+	'TIDAK TERDEFINISI') jenis
+from
+	(select
 	t1.*,
 	case
 		when t1.customer_code is null then 'RB'
@@ -34,6 +47,7 @@ then 'ON PROCESS'
 		UPPER(transform__channel)transform__channel,
 		np.location_data_created__custom_field__nopen,
 		UPPER(connote__connote_service) as connote__connote_service,
+		'MENUNGGU DATA REFERENSI'nama_produk,
 		case
 			when connote__connote_service in ('KRT', 'KBM', 'FFE', 'FF-LKPP') then 'LOGISTIK'
 			else 'KURIR'
@@ -62,7 +76,8 @@ then 'ON PROCESS'
 		5,
 		6,
 		7,
-		8)t1
+		8,
+		9)t1
 	--joinkeun ka referensi subdit
 left join
 (
@@ -73,8 +88,38 @@ left join
 		nipos.m_pelanggan)t2
 on
 	t1.customer_code = t2.idregpelanggan
-order by
-	1,
-	2,
-	3,
-	4
+)t3
+--join kantor
+left join
+(SELECT *
+FROM (
+    SELECT
+        t1.kdnopen,
+        t1.ketnopen,
+        t2.regional,
+        t2.kcu,
+        t2.kc,
+        t1.jenis,
+        ROW_NUMBER() OVER (PARTITION BY t1.kdnopen ORDER BY t1.kdnopen) AS rn
+    FROM (
+        SELECT
+            kdnopen,
+            ketnopen,
+            kdkantor,
+            jenis
+        FROM referensi.refrensikantorbaru
+    ) t1
+    JOIN (
+        SELECT DISTINCT
+            nopend_dirian,
+            kc,
+            kcu,
+            regional
+        FROM referensi.ref_kcu_kc_2023
+    ) t2
+    ON t1.kdkantor = t2.nopend_dirian
+) x
+WHERE rn = 1
+)t4
+on
+t3.location_data_created__custom_field__nopen  = t4.kdnopen
