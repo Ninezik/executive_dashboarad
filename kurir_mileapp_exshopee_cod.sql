@@ -81,8 +81,7 @@ then 'ON PROCESS'
 		6,
 		7,
 		8,
-		9
-		limit 10)t1
+		9)t1
 	--joinkeun ka referensi subdit
 left join
 (
