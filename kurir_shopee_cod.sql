@@ -85,7 +85,6 @@ coalesce(UPPER(customer_code) ,
 		'')= 'DAGSHOPEE04120A'
 			and coalesce(UPPER(custom_field__cod),
 			'')!= 'NONCOD')
-		limit 10
 )
 t1
 left join 
