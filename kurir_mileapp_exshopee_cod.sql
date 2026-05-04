@@ -8,7 +8,8 @@ coalesce(t4.regional::varchar,
 	coalesce(UPPER(t4.ketnopen),
 	'TIDAK TERDEFINISI') kcp,
 	coalesce(UPPER(t4.jenis),
-	'TIDAK TERDEFINISI') jenis
+	'TIDAK TERDEFINISI') jenis,
+	'NIPOS' sumber
 FROM
 (select t3.*,
 t2.nama_produk ,
