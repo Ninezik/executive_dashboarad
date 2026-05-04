@@ -1,6 +1,9 @@
-select
-	t3.*,
-	coalesce(t4.regional::varchar,
+select t1.*,
+'RB' subdit_id,
+tlayanan.nama_produk,
+	tlayanan.group_produk,
+	tlayanan.kategori kategori_layanan,
+		coalesce(t4.regional::varchar,
 	'TIDAK TERDEFINISI') regional,
 	coalesce(t4.kcu,
 	'TIDAK TERDEFINISI') kcu,
@@ -9,9 +12,10 @@ select
 	coalesce(UPPER(t4.ketnopen),
 	'TIDAK TERDEFINISI') kcp,
 	coalesce(UPPER(t4.jenis),
-	'TIDAK TERDEFINISI') jenis
-from
-	(select
+	'TIDAK TERDEFINISI') jenis,
+	'NIPOS' sumber
+from 
+(select
 	DATE(t1.connote__created_at) as connote__created_at,
 	DATE(pod__timereceive)pod__timereceive,
 	status_sla,
@@ -19,18 +23,20 @@ from
 	t1.transform__channel,
 	t1.location_data_created__custom_field__nopen,
 	t1.connote__connote_service,
-	'MENUNGGU DATA REFERENSI' nama_produk,
 	case
 		when t1.connote__connote_service in ('KRT', 'KBM', 'FFE', 'FF-LKPP') then 'LOGISTIK'
 		else 'KURIR'
 	end as kelompok,
+	case
+			when left(connote__connote_booking_code ,
+			3) in ('PON', 'QOB') then 'DIGITAL CHANNEL'
+			else 'NON DIGITAL CHANNEL'
+		end as kategori_digital,
 	COUNT(connote__connote_code)produksi,
 	SUM(coalesce(connote__connote_service_price, 0) + coalesce(connote__connote_surcharge_amount, 0))pendapatan,
 	SUM(coalesce(t2.good_value, 0)* 0.005) as fee_cod,
 	SUM(connote__chargeable_weight)berat,
-	SUM((coalesce(t1.connote__connote_service_price, 0) * 0.011)+(coalesce(t1.connote__connote_surcharge_amount, 0)* 0.11))pajak,
-	'RB' subdit_id,
-	'NIPOS SHOPEE COD' sumber
+	SUM((coalesce(t1.connote__connote_service_price, 0) * 0.011)+(coalesce(t1.connote__connote_surcharge_amount, 0)* 0.11))pajak
 from
 	(
 	select
@@ -79,6 +85,7 @@ coalesce(UPPER(customer_code) ,
 		'')= 'DAGSHOPEE04120A'
 			and coalesce(UPPER(custom_field__cod),
 			'')!= 'NONCOD')
+		limit 10
 )
 t1
 left join 
@@ -102,38 +109,59 @@ group by
 	7,
 	8,
 	9
-)t3
+)t1
+--join layanan
 left join
-(SELECT *
-FROM (
-    SELECT
-        t1.kdnopen,
-        t1.ketnopen,
-        t2.regional,
-        t2.kcu,
-        t2.kc,
-        t1.jenis,
---        ambil 1 saja cegah duplikat
-        ROW_NUMBER() OVER (PARTITION BY t1.kdnopen ORDER BY t1.kdnopen) AS rn
-    FROM (
-        SELECT
-            kdnopen,
-            ketnopen,
-            kdkantor,
-            jenis
-        FROM referensi.refrensikantorbaru
-    ) t1
-    JOIN (
-        SELECT DISTINCT
-            nopend_dirian,
-            kc,
-            kcu,
-            regional
-        FROM referensi.ref_kcu_kc_2023
-    ) t2
-    ON t1.kdkantor = t2.nopend_dirian
+(
+	select
+		*
+	from
+		referensi.layanan_kurlog
+)tlayanan
+on
+	coalesce(t1.connote__connote_service,'KOSONG') = coalesce(tlayanan.connote__connote_service,'KOSONG')
+	--JOIN ka referensi_kantor
+left join
+(
+	select
+		*
+	from
+		(
+		select
+			t1.kdnopen,
+			t1.ketnopen,
+			t2.regional,
+			t2.kcu,
+			t2.kc,
+			t1.jenis,
+			row_number() over (partition by t1.kdnopen
+		order by
+			t1.kdnopen) as rn
+		from
+			(
+			select
+				kdnopen,
+				ketnopen,
+				kdkantor,
+				jenis
+			from
+				referensi.refrensikantorbaru
+) t1
+		join (
+			select
+				distinct
+nopend_dirian,
+				kc,
+				kcu,
+				regional
+			from
+				referensi.ref_kcu_kc_2023
+) t2
+on
+			t1.kdkantor = t2.nopend_dirian
 ) x
-WHERE rn = 1
+	where
+		rn = 1
 )t4
 on
-	t3.location_data_created__custom_field__nopen  = t4.kdnopen
+	t1.location_data_created__custom_field__nopen = t4.kdnopen
