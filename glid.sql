@@ -1,5 +1,7 @@
 select
 	t3.*,
+	t3.nama_produk group_produk,
+	t3.nama_produk kategori_layanan,
 	coalesce(t4.regional::varchar,
 	'TIDAK TERDEFINISI') regional,
 	coalesce(t4.kcu,
@@ -9,7 +11,8 @@ select
 	coalesce(UPPER(t4.ketnopen),
 	'TIDAK TERDEFINISI') kcp,
 	coalesce(UPPER(t4.jenis),
-	'TIDAK TERDEFINISI') jenis
+	'TIDAK TERDEFINISI') jenis,
+	'GLID' sumber
 from
 	(select
 		DATE(tgl_billing) connote__created_at,
@@ -19,7 +22,7 @@ from
 		'GLID' transform__channel,
 		kode_nopen location_data_created__custom_field__nopen,
 		service_code connote__connote_service,
-		service_name nama_produk,
+		'NON DIGITAL CHANNEL' kategori_digital,
 		'LOGISTIK' as kelompok,
 		COUNT(order_code) as produksi,
 		cast(SUM(
@@ -40,7 +43,7 @@ from
         end
     ) as DECIMAL(18,2)) as pajak,
     subdit_id,
-		'GLID' as sumber
+    service_name nama_produk
 	from
 		(
 		select
@@ -60,9 +63,8 @@ from
 		from
 			glid.glid g
 		where DATE(tgl_billing) >='20260101'
-		group by 1,2,3,4,5,6,7
-)t0
-group by 1,2,3,4,5,6,7,8,9,t0.subdit_id)t3
+		group by 1,2,3,4,5,6,7)t0
+group by 1,2,3,4,5,6,7,8,t0.subdit_id,t0.service_name)t3
 left join
 (SELECT *
 FROM (
