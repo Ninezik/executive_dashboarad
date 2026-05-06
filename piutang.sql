@@ -1,15 +1,16 @@
 select 
 sp.gl_account_number ,
 sp.gl_account_text,
-sp.profit_center,
+sp.external_customer_no ,
 t4.regional,
 t4.kcu,
 t4.kc,
 t4.ketnopen kcp,
 t4.kdnopen,
 t4.jenis,
-SUM(sp.amount)nilai,
-SUM(SUM(amount))OVER() total
+coalesce(tsubdit.subdit_id,'TIDAK TERDEFINISI'),
+SUM(sp.amount)nilai
+--SUM(SUM(amount))OVER() total
 from sap.sap_piutang sp 
 left join
 (
@@ -55,4 +56,15 @@ on
 )t4
 on
 	SUBSTRING(sp.profit_center,4,5) = t4.kdnopen
-group by 1,2,3,4,5,6,7,8,9
+
+--subdit
+left join
+(
+	select
+		distinct idregpelanggan,
+		subdit_id
+	from
+		referensi.m_pelanggan)tsubdit
+on
+	sp.external_customer_no= tsubdit.idregpelanggan
+group by 1,2,3,4,5,6,7,8,9,10
