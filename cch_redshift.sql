@@ -1,76 +1,33 @@
-WITH sumber AS (
-    SELECT 
-        date(tanggal_tambah)tanggal_tambah,
-        date(tanggal_status)tanggal_status,
-        sumber_pengaduan,
-        jenis_pengaduan,
-        jenis_kiriman,
-        semua_tujuan,
-        status_akhir,
-        COUNT(distinct id_pengaduan) total_pengaduan
-    FROM cchentri
-    WHERE tanggal_tambah >'20260101'
---      AND tanggal_tambah <'20260508'
-    GROUP BY 1,2,3,4,5,6,7
-),
-numbers AS (
-    SELECT 1 AS n
-    UNION ALL SELECT 2
-    UNION ALL SELECT 3
-    UNION ALL SELECT 4
-    UNION ALL SELECT 5
-    UNION ALL SELECT 6
-    UNION ALL SELECT 7
-    UNION ALL SELECT 8
-    UNION ALL SELECT 9
-    UNION ALL SELECT 10
-),
-explode AS (
-    SELECT
-        s.tanggal_tambah,
-        s.tanggal_status,
-        s.sumber_pengaduan,
-        s.jenis_kiriman,
-        s.jenis_pengaduan,
-        s.status_akhir,
-        s.total_pengaduan,
-        TRIM(
-            SPLIT_PART(
-                s.semua_tujuan,
-                ',',
-                numbers.n
-            )
-        ) AS nopen
-    FROM sumber s
-    JOIN numbers
-        ON numbers.n <= REGEXP_COUNT(s.semua_tujuan, ',') + 1
-)
-SELECT 
-    tanggal_tambah,
-    tanggal_status,
---    sumber_pengaduan,
---    jenis_pengaduan,
-    nopen,
-    t7.deskripsi_status,
---    UPPER(t4.sumber) sumber_pengaduan,
-    coalesce(t6.regional::varchar,
+select date(cchentri.Tanggal_Tambah)Tanggal_Tambah ,
+DATE(cchentri.Tanggal_Status)Tanggal_Status ,
+t1.kantor_tujuan_update,
+cch_jenis_penanganan.Deskripsi_Status,
+cch_sumber_pengaduan.Sumber ,
+coalesce(t4.regional :: VARCHAR,
 	'TIDAK TERDEFINISI') regional,
-	coalesce(t6.kcu,
+	coalesce(t4.kcu,
 	'TIDAK TERDEFINISI') kcu,
-	coalesce(t6.kc,
+	coalesce(t4.kc,
 	'TIDAK TERDEFINISI') kc,
-	coalesce(UPPER(t6.kcp),
+	coalesce(UPPER(t4.ketnopen),
 	'TIDAK TERDEFINISI') kcp,
-	coalesce(UPPER(t6.jenis),
+	coalesce(UPPER(t4.jenis),
 	'TIDAK TERDEFINISI') jenis,
-	UPPER(coalesce(t3.deskripsi,'tidak terdefinisi')) nama_produk,
-	UPPER(coalesce(t4.sumber,'tidak terdefinisi')) sumber_pengaduan,
-	UPPER(coalesce(t5.deskripsi,'tidak terdefinisi')) jenis_pengaduan,
-    SUM(total_pengaduan) total_nilai,
-    SUM(SUM(total_pengaduan)) OVER() uji_total_seluruh,
-	'CCH' sumber
-FROM explode t_utama
---	JOIN ka referensi_kantor
+COUNT(ID_Pengaduan)jumlah_pengaduan,
+SUM(COUNT(id_pengaduan)) OVER() total
+FROM
+(    SELECT DISTINCT u.Kantor_Tujuan_Update
+    FROM cchentridet u
+    JOIN cchentri e ON e.ID_Pengaduan = u.ID_Pengaduan
+    WHERE u.Status_Update = '101'
+    AND e.Tanggal_Tambah >'20260101'
+)t1
+join cchentri
+on cchentri.Semua_Tujuan LIKE CONCAT('%', t1.Kantor_Tujuan_Update, '%')
+join cch_jenis_penanganan
+on cchentri.Status_Akhir =cch_jenis_penanganan.id_status
+join (select distinct id, UPPER(sumber)sumber from cch_sumber_pengaduan)cch_sumber_pengaduan
+on cchentri.Sumber_Pengaduan =cch_sumber_pengaduan.ID 
 left join
 (
 	select
@@ -79,7 +36,7 @@ left join
 		(
 		select
 			t1.kdnopen,
-			t1.ketnopen kcp,
+			t1.ketnopen,
 			t2.regional,
 			t2.kcu,
 			t2.kc,
@@ -112,32 +69,9 @@ on
 ) x
 	where
 		rn = 1
-)t6
+)t4
 on
-	t_utama.nopen= t6.kdnopen
---	jenis layanan
-	left JOIN(
-	select distinct kode_layanan,deskripsi
-	from cch.cch_jenis_layanan
-	)t3
-	on t_utama.jenis_kiriman=t3.kode_layanan
---	sumber pengaduan
-	left JOIN(
-	select distinct id,sumber
-	from cch.cch_sumber_pengaduan csp 
-	)t4
-	on t_utama.sumber_pengaduan=t4.id
---	jenis Pengaduan
-	left JOIN(
-	select distinct kode_jenis,deskripsi
-	from cch.cch_jenis_pengaduan
-	)t5
-	on t_utama.jenis_pengaduan=t5.kode_jenis
-	
--- status penanganan
-	left JOIN(
-	SELECT distinct id_status, deskripsi_status
-FROM cch.cch_jenis_penanganan
-	)t7
-	on t_utama.status_akhir=t7.id_status
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
+	t1.kantor_tujuan_update= t4.kdnopen
+where Tanggal_Tambah >'20260101' 
+group by 1,2,3,4,5,6,7,8,9
+order by 1
