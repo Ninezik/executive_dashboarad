@@ -5,7 +5,7 @@ cch_jenis_penanganan.Deskripsi_Status,
 cch_sumber_pengaduan.Sumber ,
 coalesce(t4.regional :: VARCHAR,
 	'TIDAK TERDEFINISI') regional,
-	coalesce(t4.kcu,
+coalesce(t4.kcu,
 	'TIDAK TERDEFINISI') kcu,
 	coalesce(t4.kc,
 	'TIDAK TERDEFINISI') kc,
@@ -13,8 +13,8 @@ coalesce(t4.regional :: VARCHAR,
 	'TIDAK TERDEFINISI') kcp,
 	coalesce(UPPER(t4.jenis),
 	'TIDAK TERDEFINISI') jenis,
-COUNT(ID_Pengaduan)jumlah_pengaduan,
-SUM(COUNT(id_pengaduan)) OVER() total
+COUNT(cchentri.id_pengaduan)jumlah_pengaduan,
+SUM(COUNT(cchentri.id_pengaduan)) OVER() total
 FROM
 (    SELECT DISTINCT u.Kantor_Tujuan_Update
     FROM cchentridet u
@@ -23,7 +23,7 @@ FROM
     AND e.Tanggal_Tambah >'20260101'
 )t1
 join cchentri
-on cchentri.Semua_Tujuan LIKE CONCAT('%', t1.Kantor_Tujuan_Update, '%')
+on cchentri.Semua_Tujuan LIKE '%' || t1.Kantor_Tujuan_Update || '%'
 join cch_jenis_penanganan
 on cchentri.Status_Akhir =cch_jenis_penanganan.id_status
 join (select distinct id, UPPER(sumber)sumber from cch_sumber_pengaduan)cch_sumber_pengaduan
@@ -72,6 +72,6 @@ on
 )t4
 on
 	t1.kantor_tujuan_update= t4.kdnopen
-where Tanggal_Tambah >'20260101' 
-group by 1,2,3,4,5,6,7,8,9
+where Tanggal_Tambah >'20260101'  
+group by 1,2,3,4,5,6,7,8,9,10
 order by 1
