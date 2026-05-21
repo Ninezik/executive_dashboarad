@@ -17,15 +17,15 @@ coalesce(t4.kcu,
 	coalesce(UPPER(t4.jenis),
 	'TIDAK TERDEFINISI') jenis,
 COUNT(*)jumlah_pengaduan,
-SUM(COUNT(*))OVER() uji_total
+SUM(COUNT(*))OVER() uji_total_pengaduan
 FROM (
-    -- Langkah 1: Ambil daftar kantor unik yang statusnya '101'
     SELECT DISTINCT cchentridet.Kantor_Tujuan_Update
     FROM cchentridet 
     JOIN cchentri 
     ON cchentri.ID_Pengaduan = cchentridet.ID_Pengaduan
     WHERE cchentridet.Status_Update = '101'
-    AND cchentri.Tanggal_Tambah >'20260101'
+    AND cchentri.Tanggal_Tambah >'20260428'
+and cchentri.Tanggal_Tambah <'20260505'
 ) AS t1
 JOIN cchentri 
 ON cchentri.Semua_Tujuan LIKE '%' || t1.Kantor_Tujuan_Update || '%'
@@ -81,5 +81,6 @@ on
 )t4
 on
 	t1.kantor_tujuan_update= t4.kdnopen
-WHERE cchentri.Tanggal_Tambah >'20260101'
+WHERE cchentri.Tanggal_Tambah >'20260428'
+and cchentri.Tanggal_Tambah <'20260505'
 group by 1,2,3,4,5,6,7,8,9,10,11,12
