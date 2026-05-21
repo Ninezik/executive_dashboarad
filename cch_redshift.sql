@@ -1,8 +1,11 @@
-select date(cchentri.Tanggal_Tambah)Tanggal_Tambah ,
-DATE(cchentri.Tanggal_Status)Tanggal_Status ,
-t1.kantor_tujuan_update,
-cch_jenis_penanganan.Deskripsi_Status,
-cch_sumber_pengaduan.Sumber ,
+SELECT 
+t1.kantor_tujuan_update ,
+date(cchentri.Tanggal_Tambah)Tanggal_Tambah ,
+date(cchentri.Tanggal_Status)Tanggal_Status ,
+cch_jenis_pengaduan.Deskripsi jenis_pengaduan,
+cch_sumber_pengaduan.Sumber sumber_pengaduan,
+cch_jenis_layanan.Deskripsi jenis_layanan,
+cch_jenis_penanganan.Deskripsi_Status ,
 coalesce(t4.regional :: VARCHAR,
 	'TIDAK TERDEFINISI') regional,
 coalesce(t4.kcu,
@@ -13,21 +16,27 @@ coalesce(t4.kcu,
 	'TIDAK TERDEFINISI') kcp,
 	coalesce(UPPER(t4.jenis),
 	'TIDAK TERDEFINISI') jenis,
-COUNT(cchentri.id_pengaduan)jumlah_pengaduan,
-SUM(COUNT(cchentri.id_pengaduan)) OVER() total
-FROM
-(    SELECT DISTINCT u.Kantor_Tujuan_Update
-    FROM cchentridet u
-    JOIN cchentri e ON e.ID_Pengaduan = u.ID_Pengaduan
-    WHERE u.Status_Update = '101'
-    AND e.Tanggal_Tambah >'20260101'
-)t1
-join cchentri
-on cchentri.Semua_Tujuan LIKE '%' || t1.Kantor_Tujuan_Update || '%'
-join cch_jenis_penanganan
-on cchentri.Status_Akhir =cch_jenis_penanganan.id_status
-join (select distinct id, UPPER(sumber)sumber from cch_sumber_pengaduan)cch_sumber_pengaduan
-on cchentri.Sumber_Pengaduan =cch_sumber_pengaduan.ID 
+COUNT(*)jumlah_pengaduan,
+SUM(COUNT(*))OVER() uji_total
+FROM (
+    -- Langkah 1: Ambil daftar kantor unik yang statusnya '101'
+    SELECT DISTINCT cchentridet.Kantor_Tujuan_Update
+    FROM cchentridet 
+    JOIN cchentri 
+    ON cchentri.ID_Pengaduan = cchentridet.ID_Pengaduan
+    WHERE cchentridet.Status_Update = '101'
+    AND cchentri.Tanggal_Tambah >'20260101'
+) AS t1
+JOIN cchentri 
+ON cchentri.Semua_Tujuan LIKE '%' || t1.Kantor_Tujuan_Update || '%'
+left join cch_sumber_pengaduan
+on cchentri.Sumber_Pengaduan =cch_sumber_pengaduan.id
+left join cch_jenis_pengaduan
+on cchentri.Jenis_Pengaduan =cch_jenis_pengaduan.Kode_Jenis
+left join cch_jenis_layanan
+on cchentri.Jenis_Kiriman =cch_jenis_layanan.Kode_Layanan 
+left join cch_jenis_penanganan
+on cchentri.Status_Akhir =cch_jenis_penanganan.ID_Status
 left join
 (
 	select
@@ -72,6 +81,5 @@ on
 )t4
 on
 	t1.kantor_tujuan_update= t4.kdnopen
-where Tanggal_Tambah >'20260101'  
-group by 1,2,3,4,5,6,7,8,9,10
-order by 1
+WHERE cchentri.Tanggal_Tambah >'20260101'
+group by 1,2,3,4,5,6,7,8,9,10,11,12
