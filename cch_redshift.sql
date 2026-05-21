@@ -3,8 +3,8 @@ t1.kantor_tujuan_update ,
 date(cchentri.Tanggal_Tambah)Tanggal_Tambah ,
 date(cchentri.Tanggal_Status)Tanggal_Status ,
 cch_jenis_pengaduan.Deskripsi jenis_pengaduan,
-cch_sumber_pengaduan.Sumber sumber_pengaduan,
-cch_jenis_layanan.Deskripsi jenis_layanan,
+UPPER(cch_sumber_pengaduan.Sumber) sumber_pengaduan,
+UPPER(cch_jenis_layanan.Deskripsi) jenis_layanan,
 cch_jenis_penanganan.Deskripsi_Status ,
 coalesce(t4.regional :: VARCHAR,
 	'TIDAK TERDEFINISI') regional,
@@ -24,8 +24,7 @@ FROM (
     JOIN cchentri 
     ON cchentri.ID_Pengaduan = cchentridet.ID_Pengaduan
     WHERE cchentridet.Status_Update = '101'
-    AND cchentri.Tanggal_Tambah >'20260428'
-and cchentri.Tanggal_Tambah <'20260505'
+    AND cchentri.Tanggal_Tambah >'20260101'
 ) AS t1
 JOIN cchentri 
 ON cchentri.Semua_Tujuan LIKE '%' || t1.Kantor_Tujuan_Update || '%'
@@ -81,6 +80,5 @@ on
 )t4
 on
 	t1.kantor_tujuan_update= t4.kdnopen
-WHERE cchentri.Tanggal_Tambah >'20260428'
-and cchentri.Tanggal_Tambah <'20260505'
+WHERE cchentri.Tanggal_Tambah >'20260101'
 group by 1,2,3,4,5,6,7,8,9,10,11,12
