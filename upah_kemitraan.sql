@@ -1,52 +1,66 @@
 SELECT 
-    a.nopend,
-    a.bulan_transaksi,
---    LEFT(a.id_mitra, 3) AS kode_mitra,
-    UPPER(COALESCE(
-        ref_jbt.keterangan,
+        coalesce(t_mutasi.nopend_t,t_upah.nopend)nopend,
+        CONVERT(date, LEFT(t_upah.bulan_transaksi, 7) + '-01') AS bulan_transaksi,
+        t_upah.id_mitra,
+        UPPER(COALESCE(
+        t_mitra.jabatan,
         SUBSTRING(
-            a.id_mitra,
-            CHARINDEX('-', a.id_mitra) + 1,
-            LEN(a.id_mitra)
+            t_upah.id_mitra,
+            CHARINDEX('-', t_upah.id_mitra) + 1,
+            LEN(t_upah.id_mitra)
         )
-    )) AS keterangan,
-    SUM(a.total_fee) AS total_fee,
-    SUM(a.produksi) AS produksi
-FROM (
-    SELECT 
-        nopend,
-        CONVERT(date, LEFT(bulan_transaksi, 7) + '-01') AS bulan_transaksi,
-        id_mitra,
-        total_fee,
-        produksi
+    ))jabatan,
+        SUM(t_upah.total_fee)total_fee,
+        SUM(t_upah.produksi)produksi,
+        'upah oranger' sumber
     FROM t_upah
-    WHERE LEFT(t_upah.bulan_transaksi, 4)>'2025'
-    UNION ALL
---    mitra lpu
-SELECT
-	coalesce(t_mitra.kantor,t_upah_lpu.nopend) nopend,
-	CONVERT(date,LEFT(t_upah_lpu.bulan_transaksi,7) + '-01') AS bulan_transaksi,
-	t_upah_lpu.id_mitra,
-	t_upah_lpu.total_kolekting_antaran total_fee,
-	t_upah_lpu.produksi
-FROM
-	t_upah_lpu
+LEFT JOIN t_mutasi
+ON t_upah.id_mitra=t_mutasi.id_Mitra
 LEFT JOIN t_mitra
-	ON
-	t_upah_lpu.id_mitra = t_mitra.id_mitra
-	WHERE left(bulan_transaksi,4)>'2025'
-) a
-LEFT JOIN ref_jbt
-    ON LEFT(a.id_mitra, 3) = ref_jbt.id_regmitra
-GROUP BY 
-    a.nopend,
-    a.bulan_transaksi,
---    LEFT(a.id_mitra, 3),
-    UPPER(COALESCE(
-        ref_jbt.keterangan,
+ON t_upah.id_mitra=t_mitra.id_mitra
+WHERE LEFT(t_upah.bulan_transaksi, 4)>'2025'
+GROUP BY coalesce(t_mutasi.nopend_t,t_upah.nopend),
+        CONVERT(date, LEFT(t_upah.bulan_transaksi, 7) + '-01'),
+        t_upah.id_mitra,
+        UPPER(COALESCE(
+        t_mitra.jabatan,
         SUBSTRING(
-            a.id_mitra,
-            CHARINDEX('-', a.id_mitra) + 1,
-            LEN(a.id_mitra)
+            t_upah.id_mitra,
+            CHARINDEX('-', t_upah.id_mitra) + 1,
+            LEN(t_upah.id_mitra)
+        )
+    ))
+ UNION ALL
+-- mitra lpu
+SELECT 
+        coalesce(t_mutasi.nopend_t,t_upah_lpu.nopend)nopend,
+        CONVERT(date, LEFT(t_upah_lpu.bulan_transaksi, 7) + '-01') AS bulan_transaksi,
+        t_upah_lpu.id_mitra,
+        UPPER(COALESCE(
+        t_mitra.jabatan,
+        SUBSTRING(
+            t_upah_lpu.id_mitra,
+            CHARINDEX('-', t_upah_lpu.id_mitra) + 1,
+            LEN(t_upah_lpu.id_mitra)
+        )
+    ))jabatan,
+        SUM(t_upah_lpu.total_kolekting_antaran)total_fee,
+        SUM(t_upah_lpu.produksi)produksi,
+        'upah lpu' sumber
+    FROM t_upah_lpu
+LEFT JOIN t_mutasi
+ON t_upah_lpu.id_mitra=t_mutasi.id_Mitra
+LEFT JOIN t_mitra
+ON t_upah_lpu.id_mitra=t_mitra.id_mitra
+WHERE LEFT(t_upah_lpu.bulan_transaksi, 4)>'2025'
+GROUP BY coalesce(t_mutasi.nopend_t,t_upah_lpu.nopend),
+        CONVERT(date, LEFT(t_upah_lpu.bulan_transaksi, 7) + '-01'),
+        t_upah_lpu.id_mitra,
+        UPPER(COALESCE(
+        t_mitra.jabatan,
+        SUBSTRING(
+            t_upah_lpu.id_mitra,
+            CHARINDEX('-', t_upah_lpu.id_mitra) + 1,
+            LEN(t_upah_lpu.id_mitra)
         )
     ))
