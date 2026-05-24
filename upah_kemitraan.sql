@@ -14,7 +14,15 @@ SELECT
         SUM(t_upah.produksi)produksi,
         't_upah' sumber
     FROM t_upah
-LEFT JOIN t_mutasi
+LEFT JOIN (
+SELECT id_mitra,nopend_t
+FROM
+(SELECT id_mitra,nopend_t,
+ROW_NUMBER () OVER(partition by id_mitra ORDER BY tgl_update DESC)urutan
+FROM t_mutasi
+)t1
+WHERE t1.urutan=1
+)t_mutasi
 ON t_upah.id_mitra=t_mutasi.id_Mitra
 LEFT JOIN t_mitra
 ON t_upah.id_mitra=t_mitra.id_mitra
@@ -48,7 +56,15 @@ SELECT
         SUM(t_upah_lpu.produksi)produksi,
         't_upah_lpu' sumber
     FROM t_upah_lpu
-LEFT JOIN t_mutasi
+LEFT JOIN (
+SELECT id_mitra,nopend_t
+FROM
+(SELECT id_mitra,nopend_t,
+ROW_NUMBER () OVER(partition by id_mitra ORDER BY tgl_update DESC)urutan
+FROM t_mutasi
+)t1
+WHERE t1.urutan=1
+)t_mutasi
 ON t_upah_lpu.id_mitra=t_mutasi.id_Mitra
 LEFT JOIN t_mitra
 ON t_upah_lpu.id_mitra=t_mitra.id_mitra
