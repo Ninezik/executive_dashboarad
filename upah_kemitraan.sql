@@ -12,7 +12,7 @@ SELECT
     ))jabatan,
         SUM(t_upah.total_fee)total_fee,
         SUM(t_upah.produksi)produksi,
-        'upah oranger' sumber
+        't_upah' sumber
     FROM t_upah
 LEFT JOIN t_mutasi
 ON t_upah.id_mitra=t_mutasi.id_Mitra
@@ -46,7 +46,7 @@ SELECT
     ))jabatan,
         SUM(t_upah_lpu.total_kolekting_antaran)total_fee,
         SUM(t_upah_lpu.produksi)produksi,
-        'upah lpu' sumber
+        't_upah_lpu' sumber
     FROM t_upah_lpu
 LEFT JOIN t_mutasi
 ON t_upah_lpu.id_mitra=t_mutasi.id_Mitra
