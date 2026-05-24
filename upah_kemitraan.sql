@@ -20,6 +20,7 @@ FROM (
         total_fee,
         produksi
     FROM t_upah
+    WHERE LEFT(t_upah.bulan_transaksi, 4)>'2025'
     UNION ALL
     SELECT 
         nopend,
@@ -28,10 +29,10 @@ FROM (
         total_kolekting_antaran AS total_fee,
         produksi
     FROM t_upah_lpu
+    WHERE LEFT(t_upah_lpu.bulan_transaksi, 4)>'2025'
 ) a
 LEFT JOIN ref_jbt
     ON LEFT(a.id_mitra, 3) = ref_jbt.id_regmitra
-WHERE YEAR(a.bulan_transaksi) > 2025
 GROUP BY 
     a.nopend,
     a.bulan_transaksi,
