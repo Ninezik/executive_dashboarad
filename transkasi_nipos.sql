@@ -1,7 +1,6 @@
 SELECT
     DATE(np.connote__created_at) AS connote__created_at,
-    np.location_data_created__custom_field__nopen,
-    UPPER(transform__channel) AS transform__channel,
+    np.location_data_created__custom_field__nopen nopen,
     UPPER(connote__connote_service) AS connote__connote_service,
     CASE
         WHEN connote__connote_service IN ('KRT', 'KBM', 'FFE', 'FF-LKPP') THEN 'LOGISTIK'
@@ -9,6 +8,9 @@ SELECT
     END AS kelompok,
     UPPER(customer_code) AS customer_code,
     t_salesforce.nm_perusahaan,
+    case when customer_code is null then 'RB'
+    else t_salesforce.subdit_id
+    end as subdit_id,
 coalesce(t_referensi_kantor.regional::varchar,
 	'TIDAK TERDEFINISI') regional,
 	coalesce(t_referensi_kantor.kcu,
