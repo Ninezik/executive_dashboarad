@@ -1,17 +1,17 @@
 select*
 FROM
 (SELECT
-    rkb."KDNOPEN",
-    UPPER(rkb."KETNOPEN")ketnopen,
-    rkk."REGIONAL",
-    rkk."KCU",
-    rkk."KC",
-    UPPER(rkb."JENIS")jenis,
+    t1."KDNOPEN",
+    UPPER(t1."KETNOPEN")ketnopen,
+    t2."REGIONAL",
+    t2."KCU",
+    t2."KC",
+    UPPER(t1."JENIS")jenis,
     ROW_NUMBER() OVER (
-        PARTITION BY rkb."KDNOPEN"
-        ORDER BY rkb."KDNOPEN"
+        PARTITION BY t1."KDNOPEN"
+        ORDER BY t1."KDNOPEN"
     ) AS rn
-FROM public."REFRENSIKANTORBARU" rkb
+FROM public."REFRENSIKANTORBARU" t1
 JOIN (
     SELECT DISTINCT
         "NOPEND_DIRIAN",
@@ -19,8 +19,8 @@ JOIN (
         "KCU",
         "REGIONAL"
     FROM public."REF_KCU_KC_2023"
-) rkk
-    ON rkb."KDKANTOR" = rkk."NOPEND_DIRIAN")
-t1
+) t2
+    ON t1."KDKANTOR" = t2."NOPEND_DIRIAN")
+t3
 --pastikeun unik
-where t1.rn='1'
+where t3.rn='1'
