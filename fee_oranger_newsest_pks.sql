@@ -1,11 +1,7 @@
 SELECT *
 FROM (
     SELECT
-        CASE
-            WHEN CHARINDEX('-', t_pajak_a.id_mitra) > 0
-                THEN LEFT(t_pajak_a.id_mitra, CHARINDEX('-', t_pajak_a.id_mitra) - 1)
-            ELSE t_pajak_a.id_mitra
-        END AS id_mitra_clean,
+        t_pajak_a.id_mitra,
         UPPER(t_mitra.jabatan) AS jabatan,
         CONVERT(DATE, t_pajak_a.tgl, 103) AS tgl,
         t_pajak_a.bulan_transaksi,
@@ -21,7 +17,6 @@ FROM (
         WHERE LEFT(bulan_transaksi, 4) = '2026'
           AND status = '01'
     ) t_pajak_a
-
     LEFT JOIN (
         SELECT id_mitra, produksi, bulan_transaksi, sumber, nopend
         FROM (
@@ -44,19 +39,8 @@ FROM (
             WHERE LEFT(bulan_transaksi, 4) = '2026'
         ) t_upah_lengkap
     ) t_upah_lengkap
-        ON CASE
-            WHEN CHARINDEX('-', t_pajak_a.id_mitra) > 0
-                THEN LEFT(t_pajak_a.id_mitra, CHARINDEX('-', t_pajak_a.id_mitra) - 1)
-            ELSE t_pajak_a.id_mitra
-        END
-        =
-        CASE
-            WHEN CHARINDEX('-', t_upah_lengkap.id_mitra) > 0
-                THEN LEFT(t_upah_lengkap.id_mitra, CHARINDEX('-', t_upah_lengkap.id_mitra) - 1)
-            ELSE t_upah_lengkap.id_mitra
-        END
+        ON t_pajak_a.id_mitra=t_upah_lengkap.id_mitra
        AND t_pajak_a.bulan_transaksi = t_upah_lengkap.bulan_transaksi
-
     LEFT JOIN (
         SELECT id_mitra, no_pks, tgl_selesai
         FROM (
@@ -72,36 +56,12 @@ FROM (
         ) t1
         WHERE rn = 1
     ) t_pks
-        ON CASE
-            WHEN CHARINDEX('-', t_pajak_a.id_mitra) > 0
-                THEN LEFT(t_pajak_a.id_mitra, CHARINDEX('-', t_pajak_a.id_mitra) - 1)
-            ELSE t_pajak_a.id_mitra
-        END
-        =
-        CASE
-            WHEN CHARINDEX('-', t_pks.id_mitra) > 0
-                THEN LEFT(t_pks.id_mitra, CHARINDEX('-', t_pks.id_mitra) - 1)
-            ELSE t_pks.id_mitra
-        END
+        ON t_pajak_a.id_mitra=t_pks.id_mitra
     LEFT JOIN db_kemitraan.dbo.t_mitra t_mitra
-        ON CASE
-            WHEN CHARINDEX('-', t_pajak_a.id_mitra) > 0
-                THEN LEFT(t_pajak_a.id_mitra, CHARINDEX('-', t_pajak_a.id_mitra) - 1)
-            ELSE t_pajak_a.id_mitra
-        END
-        =
-        CASE
-            WHEN CHARINDEX('-', t_mitra.id_mitra) > 0
-                THEN LEFT(t_mitra.id_mitra, CHARINDEX('-', t_mitra.id_mitra) - 1)
-            ELSE t_mitra.id_mitra
-        END
+        ON  t_pajak_a.id_mitra= t_mitra.id_mitra
     LEFT JOIN (
         SELECT
-            CASE
-                WHEN CHARINDEX('-', t_mutasi.id_mitra) > 0
-                    THEN LEFT(t_mutasi.id_mitra, CHARINDEX('-', t_mutasi.id_mitra) - 1)
-                ELSE t_mutasi.id_mitra
-            END AS id_mitra_clean,
+            t_mutasi.id_mitra,
             t_mutasi.nopend_t
         FROM (
             SELECT
@@ -115,10 +75,5 @@ FROM (
         ) t_mutasi
         WHERE rn = 1
     ) t_mutasi
-        ON CASE
-            WHEN CHARINDEX('-', t_pajak_a.id_mitra) > 0
-                THEN LEFT(t_pajak_a.id_mitra, CHARINDEX('-', t_pajak_a.id_mitra) - 1)
-            ELSE t_pajak_a.id_mitra
-        END
-        = t_mutasi.id_mitra_clean
+        ON t_pajak_a.id_mitra= t_mutasi.id_mitra
 ) t5;
