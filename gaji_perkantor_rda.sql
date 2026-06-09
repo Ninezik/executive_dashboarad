@@ -1,5 +1,5 @@
 select 
-date_trunc('month',tfinal.tgltransaksi )tgltransaksi,
+date(tfinal.tgltransaksi )tgltransaksi,
 tfinal.deskripsi,
 tfinal.kpc,
 coalesce(case when tfinal.kpc='40005' then 'KANTOR PUSAT BANDUNG'
