@@ -1,5 +1,6 @@
-select tfinal.deskripsi,
+select 
 date_trunc('month',tfinal.tgltransaksi )tgltransaksi,
+tfinal.deskripsi,
 tfinal.kpc,
 coalesce(case when tfinal.kpc='40005' then 'KANTOR PUSAT BANDUNG'
 else tfinal.regional  end,'TIDAK TERDEFINISI') as regional,
@@ -58,5 +59,4 @@ LEFT JOIN
 ) ref
     ON bp.kpc = ref.kdnopen
 )tfinal
---where tfinal.kpc='40005'
 group by 1,2,3,4,5,6,7
