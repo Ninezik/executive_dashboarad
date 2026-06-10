@@ -16,5 +16,13 @@ where nipos.connote__connote_state not in ('CANCEL','PENDING')
 and nipos.location_data_created__location_name!='AGP TESTING LOCATION'
 and nipos.connote__connote_service NOT IN ('LNINCOMING','010','3PE','312','311','3LX','331','332','3LP')
 and nipos.custom_field__final_swp_date_new  >'20260101'
+and coalesce(nipos.nipos.customer_code,'-') 
+not in('ASRPRUDEN04120A',
+ 'LNBAPENDA05651D',
+ 'LNBAPENDA05651E',
+ 'BANKMANDIRI02110C',
+ 'BANKMANDIRI02110D',
+ 'INDHMS07603B',
+ 'KESGLOALKES02130A')
 group by 1
 order by 1
