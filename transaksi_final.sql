@@ -35,7 +35,7 @@ coalesce(t_referensi_kantor.regional::varchar,
             ELSE COALESCE(np.custom_field__fee_value, 0)
         END
     ) AS fee_cod
-FROM nipos.nipos np
+FROM nipos.nipos__part_2026 np
 LEFT JOIN (
     SELECT DISTINCT resi, good_value
     FROM nipos.webhook_marketplace
