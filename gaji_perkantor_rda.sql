@@ -42,7 +42,7 @@ LEFT JOIN
                 UPPER("KETNOPEN") AS ketnopen,
                 "KDKANTOR" AS kdkantor,
                 "JENIS"    AS jenis
-            FROM public."REFRENSIKANTORBARU"
+            FROM ref_data."REFRENSIKANTORBARU"
         ) t1
         LEFT JOIN
         (
@@ -51,7 +51,7 @@ LEFT JOIN
                 "KC" AS kc,
                 "KCU" AS kcu,
                 "REGIONAL" AS regional
-            FROM public."ref_kcu_kc_2023"
+            FROM ref_data."REF_KCU_KC_2023"
         ) t2
             ON t1.kdkantor = t2.nopend_dirian
     ) a
