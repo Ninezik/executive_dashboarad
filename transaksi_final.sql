@@ -24,9 +24,9 @@ coalesce(t_referensi_kantor.regional::varchar,
 	'TIDAK TERDEFINISI') jenis,
     COUNT(connote__connote_code) AS produksi,
     SUM(
-        COALESCE(connote__connote_service_price,0)
-        + COALESCE(connote__connote_surcharge_amount,0)
-    ) AS pendapatan,
+    COALESCE(connote__connote_service_price, 0) / 1.011
+    + COALESCE(connote__connote_surcharge_amount, 0) / 1.11
+)pendapatan,
     SUM(
         CASE 
             WHEN UPPER(customer_code) = 'DAGSHOPEE04120A'
