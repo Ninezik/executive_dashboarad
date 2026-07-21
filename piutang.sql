@@ -10,7 +10,7 @@ SELECT
     t4.jenis,
     COALESCE(tsubdit.subdit_id, 'TIDAK TERDEFINISI') AS subdit_id,
     SUM(sp.amount) AS nilai,
-    SUM(SUM(sp.amount)) OVER () AS total
+    SUM(SUM(sp.amount)) OVER () AS uji_total
 FROM sap.sap_piutang sp
 LEFT JOIN (
     SELECT *
